@@ -5,6 +5,7 @@
  -size
  -direction
  -start point
+ -damage taken
 
   Methods
   -getHit
