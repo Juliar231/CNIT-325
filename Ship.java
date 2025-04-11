@@ -5,7 +5,7 @@
  -size
  -direction
  -start point
- -damage taken
+ -list of ship grid points
 
   Methods
   -getHit
