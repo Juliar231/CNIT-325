@@ -1,0 +1,33 @@
+public class Ship {
+    protected int size;
+    protected int health;
+    protected String type;
+    protected boolean isSunk;
+    
+    public Ship(int size, String type) {
+        this.size = size;
+        this.health = size;
+        this.type = type;
+        this.isSunk = false;
+    }
+    
+    public boolean hit() {
+        health--;
+        if (health <= 0) {
+            isSunk = true;
+        }
+        return isSunk;
+    }
+    
+    public boolean isSunk() {
+        return isSunk;
+    }
+    
+    public int getSize() {
+        return size;
+    }
+    
+    public String getType() {
+        return type;
+    }
+}
