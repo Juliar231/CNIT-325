@@ -1,0 +1,7 @@
+package battleshipgame;
+
+
+public interface Rewards {
+    void earnCoins(int amount);
+    int checkBalance();
+}
