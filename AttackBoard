@@ -1,0 +1,23 @@
+package battleshipgame;
+
+
+public class AttackBoard extends Board {
+    public boolean attack(int x, int y, Board opponentBoard) {
+        if (x < 0 || x >= SIZE || y < 0 || y >= SIZE) {
+            return false;
+        }
+        
+        if (opponentBoard.grid[x][y] == 'S') {
+            grid[x][y] = 'X'; // X represents hit
+            for (Ship ship : opponentBoard.ships) {
+                // Simplified - mark hit on first ship found
+                ship.hit();
+                break;
+            }
+            return true;
+        } else {
+            grid[x][y] = 'O'; // O represents miss
+            return false;
+        }
+    }
+}
