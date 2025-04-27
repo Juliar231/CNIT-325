@@ -1,0 +1,179 @@
+package battleshipgame;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class BattleshipGame {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            GameFrame frame = new GameFrame();
+            frame.setVisible(true);
+        });
+    }
+}
+
+class GameFrame extends JFrame {
+    private static final int BOARD_SIZE = 10;
+    private Player humanPlayer;
+    private Player computerPlayer;
+    private boolean humanTurn = true;
+    private JButton[][] humanGrid;
+    private JButton[][] computerGrid;
+    private JLabel statusLabel;
+
+    public GameFrame() {
+        setTitle("Battleship Game");
+        setSize(800, 600);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // Initialize players
+        humanPlayer = new Player("Player");
+        computerPlayer = new Player("Computer");
+        humanPlayer.placeShips();
+        computerPlayer.placeShips();
+
+        // Create game panels
+        JPanel humanPanel = createBoardPanel(true);
+        JPanel computerPanel = createBoardPanel(false);
+        
+        // Status bar
+        statusLabel = new JLabel("Your turn. Click on the right grid to attack.", JLabel.CENTER);
+        add(statusLabel, BorderLayout.SOUTH);
+
+        // Main game area
+        JPanel gamePanel = new JPanel(new GridLayout(1, 2));
+        gamePanel.add(humanPanel);
+        gamePanel.add(computerPanel);
+        add(gamePanel, BorderLayout.CENTER);
+
+        // Enable computer grid for first move
+        enableComputerGrid(true);
+    }
+
+    private JPanel createBoardPanel(boolean isHuman) {
+        JPanel panel = new JPanel(new GridLayout(BOARD_SIZE + 1, BOARD_SIZE + 1));
+        JButton[][] grid = new JButton[BOARD_SIZE][BOARD_SIZE];
+
+        // Add column headers (A-J)
+        panel.add(new JLabel(""));
+        for (char c = 'A'; c < 'A' + BOARD_SIZE; c++) {
+            JLabel label = new JLabel(String.valueOf(c));
+            label.setHorizontalAlignment(JLabel.CENTER);
+            panel.add(label);
+        }
+
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            // Add row number
+            JLabel rowLabel = new JLabel(String.valueOf(row + 1));
+            rowLabel.setHorizontalAlignment(JLabel.CENTER);
+            panel.add(rowLabel);
+
+            for (int col = 0; col < BOARD_SIZE; col++) {
+                JButton button = new JButton();
+                button.setPreferredSize(new Dimension(40, 40));
+                button.setOpaque(true);
+                button.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+
+                if (isHuman) {
+                    // Human's own board (show ships)
+                    if (humanPlayer.getDefenseBoard().grid[row][col] == 'S') {
+                        button.setBackground(Color.GRAY);
+                    } else {
+                        button.setBackground(Color.BLUE);
+                    }
+                } else {
+                    // Computer's board (hidden)
+                    button.setBackground(Color.BLUE);
+                    int finalRow = row;
+                    int finalCol = col;
+                    button.addActionListener(e -> handleAttack(finalRow, finalCol));
+                }
+
+                grid[row][col] = button;
+                panel.add(button);
+            }
+        }
+
+        if (isHuman) {
+            humanGrid = grid;
+        } else {
+            computerGrid = grid;
+        }
+
+        return panel;
+    }
+
+    private void handleAttack(int row, int col) {
+        if (!humanTurn || !computerGrid[row][col].isEnabled()) return;
+
+        boolean hit = humanPlayer.attack(computerPlayer, row, col);
+        updateButton(computerGrid[row][col], hit);
+        
+        if (hit) {
+            statusLabel.setText("Hit! Computer's turn.");
+        } else {
+            statusLabel.setText("Miss! Computer's turn.");
+        }
+
+        humanTurn = false;
+        enableComputerGrid(false);
+        
+        // Computer's turn after a delay
+        new Timer(1000, e -> {
+            computerTurn();
+            ((Timer)e.getSource()).stop();
+        }).start();
+    }
+
+    private void computerTurn() {
+        // Simple AI - random attack
+        int row, col;
+        do {
+            row = (int) (Math.random() * BOARD_SIZE);
+            col = (int) (Math.random() * BOARD_SIZE);
+        } while (humanPlayer.getDefenseBoard().grid[row][col] == 'X' || 
+                 humanPlayer.getDefenseBoard().grid[row][col] == 'O');
+
+        boolean hit = computerPlayer.attack(humanPlayer, row, col);
+        updateButton(humanGrid[row][col], hit);
+
+        if (hit) {
+            statusLabel.setText("Computer hit your ship at " + (char)('A'+col) + (row+1));
+        } else {
+            statusLabel.setText("Computer missed at " + (char)('A'+col) + (row+1));
+        }
+
+        humanTurn = true;
+        enableComputerGrid(true);
+        checkGameOver();
+    }
+
+    private void updateButton(JButton button, boolean hit) {
+        button.setEnabled(false);
+        button.setText(hit ? "X" : "O");
+        button.setBackground(hit ? Color.RED : Color.WHITE);
+    }
+
+    private void enableComputerGrid(boolean enabled) {
+        if (computerGrid == null) return;
+        
+        for (JButton[] row : computerGrid) {
+            for (JButton button : row) {
+                button.setEnabled(enabled);
+            }
+        }
+    }
+
+    private void checkGameOver() {
+        if (humanPlayer.hasLost()) {
+            JOptionPane.showMessageDialog(this, "Computer wins! Game over.");
+            System.exit(0);
+        } else if (computerPlayer.hasLost()) {
+            JOptionPane.showMessageDialog(this, "You win! Congratulations!");
+            System.exit(0);
+        }
+    }
+}
