@@ -1,3 +1,5 @@
+package battleshipdemo;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
@@ -121,18 +123,19 @@ public class BattleshipDemo extends JFrame {
         defensePanel.add(new JLabel("Your Ships", SwingConstants.CENTER), BorderLayout.NORTH);
         defensePanel.add(defenseGrid, BorderLayout.CENTER);
         
-        // Ship selection panel
-        JPanel shipSelectionPanel = new JPanel();
+        // Ship selection panel with fixed layout
+        JPanel shipSelectionPanel = new JPanel(new GridLayout(1, 5, 5, 0));
+        
         JButton submarineBtn = new JButton("Submarine (2)");
         JButton destroyerBtn = new JButton("Destroyer (3)");
         JButton ferryBtn = new JButton("Ferry (4)");
-        JButton aircraftCarrierBtn = new JButton("Aircraft Carrier (5)");
+        JButton aircraftBtn = new JButton("Aircraft (5)");
         JButton rotateBtn = new JButton("Rotate");
         
         submarineBtn.addActionListener(e -> selectShip(new Submarine()));
         destroyerBtn.addActionListener(e -> selectShip(new Destroyer()));
         ferryBtn.addActionListener(e -> selectShip(new Ferry()));
-        aircraftCarrierBtn.addActionListener(e -> selectShip(new AircraftCarrier()));
+        aircraftBtn.addActionListener(e -> selectShip(new AircraftCarrier()));
         rotateBtn.addActionListener(e -> {
             isHorizontal = !isHorizontal;
             addToLogArea("Ship orientation " + (isHorizontal ? "horizontal" : "vertical"));
@@ -141,7 +144,7 @@ public class BattleshipDemo extends JFrame {
         shipSelectionPanel.add(submarineBtn);
         shipSelectionPanel.add(destroyerBtn);
         shipSelectionPanel.add(ferryBtn);
-        shipSelectionPanel.add(aircraftCarrierBtn);
+        shipSelectionPanel.add(aircraftBtn);
         shipSelectionPanel.add(rotateBtn);
         
         defensePanel.add(shipSelectionPanel, BorderLayout.SOUTH);
