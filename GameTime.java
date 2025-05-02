@@ -1,25 +1,50 @@
-package battleshipgame;
+package battleshipdemo;
 
-
-import java.time.*;
-
+/**
+ * GameTime class to track and manage game time
+ */
 public class GameTime {
-    private Instant startTime;
-    private Duration duration;
+    private long startTime;
+    private long endTime;
+    private boolean running;
     
-    public void start() {
-        startTime = Instant.now();
+    public GameTime() {
+        running = false;
     }
     
-    public void stop() {
-        duration = Duration.between(startTime, Instant.now());
-    }
-    
-    public String getDuration() {
-        if (duration == null) {
-            return "Game still in progress";
+    public void startTime() {
+        if (!running) {
+            startTime = System.currentTimeMillis();
+            running = true;
         }
-        return String.format("%d minutes %d seconds", 
-               duration.toMinutesPart(), duration.toSecondsPart());
+    }
+    
+    public void stopTime() {
+        if (running) {
+            endTime = System.currentTimeMillis();
+            running = false;
+        }
+    }
+    
+    public void resetTime() {
+        startTime = 0;
+        endTime = 0;
+        running = false;
+    }
+    
+    public long getElapsedTime() {
+        if (running) {
+            return System.currentTimeMillis() - startTime;
+        } else {
+            return endTime - startTime;
+        }
+    }
+    
+    public String getFormattedTime() {
+        long elapsedTime = getElapsedTime();
+        long seconds = elapsedTime / 1000;
+        long minutes = seconds / 60;
+        seconds = seconds % 60;
+        return String.format("%02d:%02d", minutes, seconds);
     }
 }
