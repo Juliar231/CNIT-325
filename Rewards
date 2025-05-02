@@ -1,7 +1,9 @@
-package battleshipgame;
+package battleshipdemo;
 
-
+/**
+ * Rewards interface for implementing game rewards
+ */
 public interface Rewards {
-    void earnCoins(int amount);
-    int checkBalance();
+    void earn(int amount);
+    int getAmount();
 }
