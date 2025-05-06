@@ -47,6 +47,7 @@ public class BattleshipGame extends JFrame {
     private JLabel playerInfoLabel;
     private JLabel opponentInfoLabel;
     private JLabel gameTimeLabel;
+    //private JLabel localTimeLabel;
     private JLabel coinLabel;
     private JLabel turnLabel;
     
@@ -142,8 +143,16 @@ public class BattleshipGame extends JFrame {
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 
                 addToLogArea("Opponent connected! Ready to play.");
-                
+                String addr = clientSocket.getRemoteSocketAddress().toString();
+                //There will be an error with the location since currently the socket uses the loopback address.
+                //There are also possible errors with the IP formatting
+                //If we could go back and fix this, it would probably be better to have each person call the api without ip arguement and then share the result
+                opponentInfoLabel.setText("Opponent: " + opponent.getName() + " ["+ApiAccess.getCountry(addr.substring(0, addr.indexOf(":")))+"] ");
                 // Start message receiver
+                
+                System.out.println(addr.substring(0, addr.indexOf(":")));
+                //see comment above get country for why time of the oppnent cant be retreived in the current state
+                addToLogArea("Opponent Time: " + ApiAccess.getTime(addr.substring(0, addr.indexOf(":"))));
                 startMessageReceiver();
                 
             } catch (IOException e) {
@@ -168,6 +177,17 @@ public class BattleshipGame extends JFrame {
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 
                 addToLogArea("Connected to opponent! Ready to play.");
+                
+                String addr = clientSocket.getRemoteSocketAddress().toString();
+                //There will be an error with the location since currently the socket uses the loopback address.
+                //There are also possible errors with the IP formatting
+                //If we could go back and fix this, it would probably be better to have each person call the api without ip arguement and then share the result
+                opponentInfoLabel.setText("Opponent: " + opponent.getName() + " ["+ApiAccess.getCountry(addr.substring(0, addr.indexOf(":")))+"] ");
+                // Start message receiver
+                
+                System.out.println(addr.substring(0, addr.indexOf(":")));
+                //see comment above get country for why time of the oppnent cant be retreived in the current state
+                addToLogArea("Opponent Time: " + ApiAccess.getTime(addr.substring(0, addr.indexOf(":"))));
                 
                 // Start message receiver
                 startMessageReceiver();
@@ -404,15 +424,17 @@ public class BattleshipGame extends JFrame {
         // Info panel (top)
         infoPanel = new JPanel(new BorderLayout());
         JPanel playerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        playerInfoLabel = new JLabel("Player: " + currentPlayer.getName());
-        opponentInfoLabel = new JLabel("Opponent: " + opponent.getName());
-        gameTimeLabel = new JLabel("Time: 00:00");
+        playerInfoLabel = new JLabel("Player: " + currentPlayer.getName() + " ["+ApiAccess.getCountry()+"]");
+        opponentInfoLabel = new JLabel("Opponent: " + opponent.getName() + " ["+"]");
+        gameTimeLabel = new JLabel("Timer: 00:00");
+        //localTimeLabel = new JLabel("Local Time: " + ApiAccess.getTime());
         turnLabel = new JLabel("Status: " + (setupPhase ? "Place your ships" : 
             (playerTurn ? "Your turn" : "Opponent's turn")));
         
         playerPanel.add(playerInfoLabel);
         playerPanel.add(opponentInfoLabel);
         playerPanel.add(gameTimeLabel);
+        //playerPanel.add(localTimeLabel);
         
         JPanel coinPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         coinLabel = new JLabel("Coins: " + currentPlayer.getCoins());
