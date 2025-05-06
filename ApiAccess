@@ -1,0 +1,88 @@
+
+import java.net.*;
+import org.json.simple.*;
+import org.json.simple.parser.*;
+import java.util.*;
+/**
+ *
+ * @author indya
+ */
+public class ApiAccess {
+
+    /**
+     * @param args the command line arguments
+     */
+    
+    public static String getTime(){
+        return convertWorldDateTime(connectToWorldClock(0));
+    }
+    
+    public static String convertWorldDateTime(String dateTime){
+        char[] DTArray = dateTime.toCharArray();
+        
+        String timeString = "";
+        
+        int i = 0;
+        for(char c : DTArray){
+            if( i > 0){
+                timeString += c;
+                i--;
+            }
+            if( c == 'T'){
+                i=5;
+            }
+        }
+        
+        return timeString;
+    }
+    
+    public static String connectToWorldClock(int r){
+        if(r < 50){
+        try {
+            URI worldClockByIP = new URI("http://worldtimeapi.org/api/ip");
+            
+            HttpURLConnection ClockConnection = (HttpURLConnection)worldClockByIP.toURL().openConnection();
+            ClockConnection.setRequestMethod("GET");
+            ClockConnection.setConnectTimeout(10000);
+            ClockConnection.connect();
+            
+            int responseCode = ClockConnection.getResponseCode();
+            
+            if(responseCode != 200){
+                throw new RuntimeException("repsonse: " + responseCode);
+            }else{
+                String apiData = "";
+                Scanner clockScanner = new Scanner(worldClockByIP.toURL().openStream());
+            
+                while (clockScanner.hasNext()){
+                    apiData += clockScanner.nextLine();
+                }
+                
+                clockScanner.close();
+                
+                JSONParser dataParser = new JSONParser();
+                JSONObject dataObject = (JSONObject) dataParser.parse(apiData);
+                
+                String dataField = (String) dataObject.get("datetime");
+                
+                return dataField;
+                
+            }
+           
+            
+        }catch (Exception e){
+            //e.printStackTrace();
+            return connectToWorldClock(r+1);
+        }
+        }else{
+            return("time error");
+        }
+    }
+    
+    
+    public static void main(String[] args) {
+        // TODO code application logic here
+        System.out.println(ApiAccess.getTime());
+    }
+    
+}
